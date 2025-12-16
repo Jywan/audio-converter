@@ -1,17 +1,94 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const path = require('path');
+const { spawn } = require('child_process');
 
 function createWindow() {
     const win = new BrowserWindow({
-        width: 1000,
-        height: 700,
+        width: 1100,
+        height: 760,
         webPreferences: {
+            preload: path.join(__dirname, 'preload.cjs'),
             contextIsolation: true,
             nodeIntegration: false,
         },
     });
 
-    win.loadURL('http://localhost:5173');
+    const isDev = !app.isPackaged;
+    if (isDev) {
+        win.loadURL('http://localhost:5173');    
+    } else {
+        win.loadFile(path.join(__dirname, '..', 'dist', 'index.html'));
+    }
 }
+
+ipcMain.handle('pick-audio-file', async () => {
+    const { canceled, filePaths } = await dialog.showOpenDialog({
+        title: '오디오 파일 선택',
+        properties: ['openFile'],
+        filters: [
+            { name: 'Audio', extensions: ['mp3', 'wav', 'm4a', 'aac', 'flac', 'ogg'] },
+            { name: 'All Files', extensions: ['*'] },
+        ],
+    });
+
+    if (canceled || filePaths.length === 0) return null;
+    return filePaths[0];
+})
+
+ipcMain.handle('convert-audio', async (_evt, payload) => {
+    try {
+        const inputPath = payload?.inputPath;
+        const format = payload?.format;
+        const sr = (payload?.sampleRate || '').trim();
+        const ch = (payload?.channels || '').trim();
+        const br = (payload?.bitrate || '').trim();
+
+        if (!inputPath) return { ok: false, error: 'inputPath is empty' };
+        if (!['mp3', 'wav', 'm4a'].includes(format)) return { ok: false, error: `invalid format: ${format}` };
+
+        const dir = path.dirname(inputPath);
+        const base = path.basename(inputPath, path.extname(inputPath));
+        
+        let outputPath = '';
+        let args = [];
+
+        if (format === 'mp3') {
+            outputPath = path.join(dir, `${base}.mp3`);
+            args = ['-y', '-i', inputPath, '-c:a', 'libmp3lame', outputPath];
+        } else if (format === 'wav') {
+            outputPath = path.join(dir, `${base}.wav`);
+            args = ['-y', '-i', inputPath, '-c:a', 'pcs,_s16le', outputPath];
+        } else if (format === 'm4a') {
+            outputPath = path.join(dir, `${base}.m4a`);
+            args = ['-y', '-i', inputPath, '-c:a', 'aac', outputPath];
+        }
+
+        if (sr) args.slice(args.length - 1, 0, '-ar', sr);
+        if (ch) args.slice(args.lengrh - 1, 0, '-ac', ch);
+        if (br && (format === 'mp3' || format === 'm4a')) args.slice(args.length - 1, 0, '-b:a', `${br}k`);
+
+        const proc = spawn('ffmpeg', args);
+        
+        let stderr = '';
+        let spwanError = null;
+
+        proc.on('error', (err) => {
+            spwanError = err;
+        });
+
+        proc.stderr.on('data', (d) => (stderr += d.toString()));
+
+        const code = await new Promise((resolve) => proc.on('close', resolve));
+
+        if (spwanError) return { ok: false, error: `ffmpeg 실행 실패: ${spwanError.message}\n(ffmpeg 설치/경로 확인 필요)`, };
+        if (code !== 0) return { ok: false, error: stderr || `ffmpeg failed (code=${code})` };
+
+        return { ok: true, outputPath };
+
+    } catch (e) {
+        return { ok: false, error: e?.message || String(e) }
+    }
+});
 
 app.whenReady().then(createWindow);
 

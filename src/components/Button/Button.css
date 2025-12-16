@@ -1,0 +1,18 @@
+.btn{
+    border: 1px solid var(--border);
+    background: rgba(17, 24, 39, .65);
+    color: var(--text);
+    border-radius: 12px;
+    padding: 10px 12px;
+    cursor: pointer;
+    /* transition:transform 120ms ease, background 120ms ease, border-color 120ms ease, opacity 120ms ease; */
+};
+
+.btn:hover{ background: rgba(17, 24, 39, .85); }
+.btn:active{ transform: scale(.98); }
+.btn:disabled{ opacity: .55; cursor: not-allowed; }
+.btnPrimary{
+    border-color: rgba(96, 165, 250, .4);
+    background: rgba(96, 165, 250, .12);
+}
+.btnPrimary:hover{ background: rgba(96, 165, 250, .18); }

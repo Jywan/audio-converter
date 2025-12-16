@@ -1,0 +1,12 @@
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+    from { max-height: 0; opacity: 0; transform: translateY(-4px); }
+    to { max-height: 220px; opacity: 1; transform: translateY(0); }
+}
+
+.animFadeUp { animation: fadeUp 180ms ease-out; }
+.animSlideDonwn { animation: slideDown 220ms ease-out; overflow: hidden; }
