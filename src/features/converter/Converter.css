@@ -1,0 +1,70 @@
+.warp{
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px;
+}
+.top{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+.h1{ margin: 0; font-size: 18px; font-weight: 900; }
+.sub{ margin: 4px 0 0 0; font-size: 12px; color:var(--muted) }
+
+.panel{
+    border: 1px solid var(--border);
+    border-radius: var(--r16);
+    background: var(--panel);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+.panelHead{
+    padding: 14px;
+    background: var(--panel2);
+    border-bottom: 1px solid rgba(31, 41, 55, .7);
+}
+.panelBody{ padding: 14px; }
+
+.row{ display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.box{
+    width: 100%;
+    border: 1px solid rgba(31, 41, 55, .85);
+    background: rgba(11, 18, 34, .65);
+    border-radius: 12px;
+    padding: 12px;
+    word-break: break-all;
+    font-size: 12px;
+}
+.boxKey{ color: var(--muted); margin-bottom: 6px; }
+
+.adv{
+    margin-top: 12px;
+    border: 1px solid rgba(31, 41, 55, .85);
+    background: rgba(11, 18, 34, .55);
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.kv{ display: flex; gap: 8px; flex-wrap: wrap; }
+.pill{
+    border: 1px solid rgba(31, 41, 55, .85);
+    background: rgba(17, 24, 39, .55);
+    border-radius: 999px;
+    padding: 8px 10px;
+    font-size: 12px;
+    color: var(--muted);
+}
+.log{
+    margin-top: 12px;
+    height: 280px;
+    overflow: auto;
+    padding: 12px;
+    border: 1px solid rgba(31, 41, 55, .85);
+    background: rgba(11, 18, 34, .65);
+    font-family: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;
+    font-size: 12px;
+    white-space: pre-wrap;
+    line-height: 1.35;
+}

@@ -1,10 +1,10 @@
 import './ToglleGroup.css';
 
-export type ToglleGroup<T extends string> = { value: T; title: string; desc?: string };
+export type ToggleGroup<T extends string> = { value: T; title: string; desc?: string };
 
-export function ToglleGroup<T extends string>(props: {
+export function ToggleGroup<T extends string>(props: {
     value: T;
-    items: ToglleGroup<T>[];
+    items: ToggleGroup<T>[];
     onChange: (v: T) => void;
     disabled?: boolean;
 }) {

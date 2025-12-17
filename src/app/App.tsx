@@ -1,10 +1,6 @@
-import { useState } from 'react'
 import './App.css'
+import { Converter } from '../features/converter/Converter'
 
-function App() {
-  const [count, setCount] = useState(0)
-
-  
+export default function App() {
+  return <Converter />;
 }
-
-export default App
