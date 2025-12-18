@@ -14,14 +14,14 @@ export function HeaderBar({ status, busy, canConvert, onPick, onConvert }: Props
                 <div className="wfStatus">Status : {status}</div>
             </div>
 
-            <div className="wfActions">
+            {/* <div className="wfActions">
                 <button className="wfBtn" type="button" onClick={onPick} disabled={busy}>
                     파일 선택
                 </button>
                 <button className="wfBtn wfBtnPrimary" type="button" onClick={onConvert} disabled={!canConvert}>
                     {busy ? '변환 중...' : '변환'}
                 </button>
-            </div>
+            </div> */}
         </header>
     );
 }

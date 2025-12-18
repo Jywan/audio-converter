@@ -99,6 +99,66 @@ ipcMain.handle('convert-audio', async (_evt, payload) => {
     }
 });
 
+
+ipcMain.handle('probe-audio', async (_evt, payload) => {
+    try {
+    const inputPath = payload?.inputPath;
+    if (!inputPath) return { ok: false, error: 'inputPath is empty' };
+
+    
+    const args = ['-hide_banner', '-i', inputPath];
+
+    const proc = spawn('ffmpeg', args);
+
+    let stderr = '';
+    let spawnError = null;
+
+    proc.on('error', (err) => { spawnError = err; });
+    proc.stderr.on('data', (d) => (stderr += d.toString()));
+
+
+    await new Promise((resolve) => proc.on('close', resolve));
+
+    if (spawnError) return { ok: false, error: `ffmpeg 실행 실패: ${spawnError.message}` };
+
+    const durMatch = stderr.match(/Duration:\s*(\d+):(\d+):(\d+)\.(\d+)/);
+    const audioLine = stderr.split('\n').find(l => l.includes('Audio:')) || '';
+
+    const codecMatch = audioLine.match(/Audio:\s*([^,]+)/);
+    const srMatch = audioLine.match(/,\s*(\d+)\s*Hz/);
+    const chMatch = audioLine.match(/,\s*(mono|stereo|\d+\s*channels)/i);
+    const brMatch = audioLine.match(/,\s*(\d+)\s*kb\/s/i);
+
+    const duration = durMatch
+        ? `${durMatch[1]}:${durMatch[2]}:${durMatch[3]}.${durMatch[4]}`
+        : null;
+
+    const channels = (() => {
+        if (!chMatch) return null;
+        
+        const v = chMatch[1].toLowerCase();
+        if (v === 'mono') return 1;
+        if (v === 'stereo') return 2;
+        const n = v.match(/(\d+)/);
+        return n ? Number(n[1]) : null;
+    })();
+
+    return {
+        ok: true,
+        meta: {
+            codec: codecMatch ? codecMatch[1].trim() : null,
+            sampleRate: srMatch ? srMatch[1] : null,
+            channels,
+            bitRate: brMatch ? String(Number(brMatch[1]) * 1000) : null,
+            duration,
+        },
+    };
+    } catch (e) {
+    return { ok: false, error: e?.message || String(e) };
+    }
+});
+
+
 app.whenReady().then(createWindow);
 
 app.on('window-all-closed', () => {

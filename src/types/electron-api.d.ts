@@ -14,6 +14,10 @@ declare global {
                 | { ok: true; outputPath: string }
                 | { ok: false; error: string }
             >;
+            probeAudio: (inputPath: string) => Promise<
+                | { ok: true; meta: { codec: string | null; sampleRate: string | null; channels: number | null; bitRate: string | null; duration: string | null } }
+                | { ok: false; error: string }
+            >;
         };
     }
 }

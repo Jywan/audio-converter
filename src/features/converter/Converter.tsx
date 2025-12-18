@@ -47,11 +47,56 @@ export function Converter() {
                         <div className="wfDivider" />
                         <ResultSection busy={c.busy} success={success} failed={failed} resultPath={resultPath} log={c.log}
                             showLog={showLog} onToggleLog={() => setShowLog(v => !v)} />
+
+                        <div className="wfDivider" />
+
+                        <div className="wfActionBar">
+                            <div className="wfActionHint">
+                                {c.busy
+                                ? '변환 중입니다...'
+                                : c.selectedPath
+                                    ? '설정이 완료되었습니다. 변환을 실행하십시오.'
+                                    : '먼저 파일을 선택하십시오.'}
+                            </div>
+
+                            <div className="wfActions">
+                                <button className="wfBtn" type="button" onClick={c.pick} disabled={c.busy}>
+                                파일 선택
+                                </button>
+                                <button className="wfBtn wfBtnPrimary" type="button" onClick={c.convert} disabled={!canConvert}>
+                                {c.busy ? '변환 중...' : '변환'}
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <div className="wfCard">
                         <h2 className="wfCardTitle">보조 영역</h2>
-                        <div className="wfResultLine"></div>
+
+                        <div className="wfResultLine">파일 정보</div>
+                        <div className="wfPath">
+                            {c.meta
+                            ? [
+                                `codec: ${c.meta.codec ?? '-'}`,
+                                `sr: ${c.meta.sampleRate ?? '-'}`,
+                                `ch: ${c.meta.channels ?? '-'}`,
+                                `br: ${c.meta.bitRate ?? '-'}`,
+                                `dur: ${c.meta.duration ?? '-'}`,
+                                ].join('\n')
+                            : '파일을 선택하면 메타데이터가 표시됩니다.'}
+                        </div>
+
+                        <div className="wfDivider" />
+
+                        <div className="wfResultLine">현재 변환 설정</div>
+                        <div className="wfPath">
+                            {[
+                            `format: ${c.format}`,
+                            `sampleRate: ${c.sampleRate || 'Source'}`,
+                            `channels: ${c.channels || 'Source'}`,
+                            `bitrate: ${c.bitrateDisabled ? 'N/A' : (c.bitrate || 'Auto')}`,
+                            ].join('\n')}
+                        </div>
                     </div>
                 </div>
             </div>

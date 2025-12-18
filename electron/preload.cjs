@@ -10,4 +10,7 @@ contextBridge.exposeInMainWorld('api', {
         channels,
         bitrate,
         }),
+    probeAudio: async (inputPath) => {
+        return await ipcRenderer.invoke('probe-audio', { inputPath });
+    },
 });
