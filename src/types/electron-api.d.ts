@@ -6,7 +6,7 @@ declare global {
             pickAudioFile: () => Promise<string | null>;
             convertAudio: (
                 inputPath: string,
-                format: 'mp3' | 'wav' | 'm4a',
+                format: 'mp3' | 'wav' | 'm4a' | 'aac' | 'flac' | 'ogg',
                 sampleRate: string,
                 channels: string,
                 bitrate: string,

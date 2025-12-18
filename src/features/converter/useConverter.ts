@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-export type Format = 'mp3' | 'wav' | 'm4a';
+export type Format = 'mp3' | 'wav' | 'm4a' | 'aac' | 'flac' | 'ogg';
 
 export function useConverter() {
     const [ selectedPath, setSelectedPath ] = useState<string | null>(null);
@@ -14,7 +14,7 @@ export function useConverter() {
     const [ busy, setBusy ] = useState(false);
     const [ log, setLog ] = useState('');
 
-    const bitrateDisabled = useMemo(() => format === 'wav', [format]);
+    const bitrateDisabled = useMemo(() => format === 'wav' || format === 'flac', [format]);
 
     useEffect(() => {
         if (format === 'wav') setBitrate('');

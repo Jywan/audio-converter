@@ -26,7 +26,7 @@ ipcMain.handle('pick-audio-file', async () => {
         title: '오디오 파일 선택',
         properties: ['openFile'],
         filters: [
-            { name: 'Audio', extensions: ['mp3', 'wav', 'm4a', 'aac', 'flac', 'ogg'] },
+            { name: 'Audio', extensions: ['mp3', 'wav', 'm4a', 'aac', 'flac', 'ogg', 'opus', 'aiff', 'aif', 'caf', 'wma'] },
             { name: 'All Files', extensions: ['*'] },
         ],
     });
@@ -36,6 +36,7 @@ ipcMain.handle('pick-audio-file', async () => {
 })
 
 ipcMain.handle('convert-audio', async (_evt, payload) => {
+
     try {
         const inputPath = payload?.inputPath;
         const format = payload?.format;
@@ -44,7 +45,7 @@ ipcMain.handle('convert-audio', async (_evt, payload) => {
         const br = (payload?.bitrate || '').trim();
 
         if (!inputPath) return { ok: false, error: 'inputPath is empty' };
-        if (!['mp3', 'wav', 'm4a'].includes(format)) return { ok: false, error: `invalid format: ${format}` };
+        if (!['mp3', 'wav', 'm4a', 'aac', 'flac', 'ogg'].includes(format)) return { ok: false, error: `invalid format: ${format}` };
 
         const dir = path.dirname(inputPath);
         const base = path.basename(inputPath, path.extname(inputPath));
@@ -57,15 +58,23 @@ ipcMain.handle('convert-audio', async (_evt, payload) => {
             args = ['-y', '-i', inputPath, '-c:a', 'libmp3lame', outputPath];
         } else if (format === 'wav') {
             outputPath = path.join(dir, `${base}.wav`);
-            args = ['-y', '-i', inputPath, '-c:a', 'pcs,_s16le', outputPath];
+            args = ['-y', '-i', inputPath, '-c:a', 'pcm_s16le', outputPath];
         } else if (format === 'm4a') {
             outputPath = path.join(dir, `${base}.m4a`);
             args = ['-y', '-i', inputPath, '-c:a', 'aac', outputPath];
+        } else if (format === 'aac') {
+            outputPath = path.join(dir, `${base}.aac`);
+            args = ['-y', '-i', inputPath, '-c:a', 'aac', outputPath];
+        } else if (format === 'flac') {
+            outputPath = path.join(dir, `${base}.flac`);
+            args = ['-y', '-i', inputPath, '-c:a', 'flac', outputPath];
+        } else if (format === 'ogg') {
+            args = ['-y', '-i', inputPath, '-c:a', 'libopus', outputPath];
         }
 
-        if (sr) args.slice(args.length - 1, 0, '-ar', sr);
-        if (ch) args.slice(args.lengrh - 1, 0, '-ac', ch);
-        if (br && (format === 'mp3' || format === 'm4a')) args.slice(args.length - 1, 0, '-b:a', `${br}k`);
+        if (sr) args.splice(args.length - 1, 0, '-ar', sr);
+        if (ch) args.splice(args.length - 1, 0, '-ac', ch);
+        if (br && (format === 'mp3' || format === 'm4a' || format === 'aac' || format === 'ogg')) args.splice(args.length - 1, 0, '-b:a', `${br}k`);
 
         const proc = spawn('ffmpeg', args);
         

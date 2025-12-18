@@ -1,6 +1,13 @@
 const { contextBridge, ipcRenderer } = require('electron');
-//수정중
+
 contextBridge.exposeInMainWorld('api', {
     pickAudioFile: () => ipcRenderer.invoke('pick-audio-file'),
-    convertAudio: (inputPath, format)
-})
+    convertAudio: (inputPath, format, sampleRate, channels, bitrate) =>
+        ipcRenderer.invoke('convert-audio', {
+        inputPath,
+        format,
+        sampleRate,
+        channels,
+        bitrate,
+        }),
+});

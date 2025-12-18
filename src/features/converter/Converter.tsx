@@ -1,95 +1,60 @@
-import './Converter.css'
-import { Button } from '../../components/Button/Button'
-import { ToggleGroup } from '../../components/ToggleGroup/ToggleGroup'
-import { useConverter, type Format } from './useConverter'
+import { useMemo, useState } from "react";
+import { useConverter, type Format } from "./useConverter";
+
+import { HeaderBar } from "./sections/HeaderBar";
+import { InputSection } from "./sections/InputSection";
+import { SettingSection } from "./sections/SettingSection";
+import { ResultSection } from "./sections/ResultSection";
 
 export function Converter() {
     const c = useConverter();
+    const [showLog, setShowLog] = useState(false);
 
-    const formatItems = [
-        { value: 'mp3' as Format, title: 'MP3', desc: '범용' },
-        { value: 'wav' as Format, title: 'WAV', desc: '무손실(PCM)'},
-        { value: 'm4a' as Format, title: 'M4A', desc: 'AAC' },
-    ];
+    const canConvert = !!c.selectedPath && !c.busy;
+    const status = c.busy ? 'Converting' : (c.selectedPath ? 'Ready' : 'Waiting');
 
-    const rateItems = [
-        { value: '', title: '원본', desc: ''},
-        { value: '8000', title: '8000', desc: 'Hz' },
-        { value: '16000', title: '16000', desc: 'Hz' },
-        { value: '44100', title: '44100', desc: 'Hz' },
-        { value: '48000', title: '48000', desc: 'Hz' },
-    ];
+    const formats = useMemo(() => ([
+        { value: 'mp3' as Format, label: 'MP3' },
+        { value: 'wav' as Format, label: 'WAV' },
+        { value: 'm4a' as Format, label: 'M4A' },
+        { value: 'flac' as Format, label: 'FLAC' },
+        { value: 'ogg' as Format, label: 'OGG' },
+        { value: 'aac' as Format, label: 'AAC' },
+    ]), []);
 
-    const chItems = [
-        { value: '', title: '원본', desc: '' },
-        { value: '1', title: '모노', desc: '1ch' },
-        { value: '2', title: '스테레오', desc: '2ch' },
-    ];
-
-    const brItems = [
-        { value: '', title: '자동', desc: 'VBR' },
-        { value: '128', title: '128', desc: 'kbps' },
-        { value: '192', title: '192', desc: 'kbps' },
-        { value: '320', title: '320', desc: 'kbps' },
-    ];
+    const resultLine = c.log.split('\n').reverse().find(l => l.startsWith('결과 파일:')) ?? '';
+    const resultPath = resultLine ? resultLine.replace('결과 파일:', '').trim() : '';
+    const failed = c.log.includes('변환 실패');
+    const success = c.log.includes('변환 성공');
 
     return (
-        <div className='wrap'>
-            <div className='top'>
-                <div>
-                    <h1 className='h1'>Audio Converter</h1>
-                    <p className='sub'>카드 선택 UI + 고급 옵션 애니메이션 + 로컬 변환</p>
-                </div>
-                <div className='row'>
-                    <Button variant='primary' onClick={c.pick} disabled={c.busy}>파일 선택</Button>
-                    <Button onClick={c.convert} disabled={!c.selectedPath || c.busy}>변환</Button>
-                    <Button onClick={() => c.setAdvancedOpen(!c.advancedOpen)} disabled={c.busy}>고급 옵션 {c.advancedOpen ? '닫기' : '열기'}</Button>
-                </div>
-            </div>
+        <div className="wfPage">
+            <div className="wfShell">
+                <HeaderBar status={status} busy={c.busy} canConvert={canConvert} onPick={c.pick} onConvert={c.convert} />
 
-            <div className='panel'>
-                <div className='panelHead'>
-                    <div className='pill'>상태: {c.busy ? 'Converting' : 'Ready'}</div>
-                </div>
+                <div className="wfBody">
+                    <div className="wfCard">
+                        <InputSection selectedPath={c.selectedPath} />
 
-                <div className='panelBody animFadeUp'>
-                    <div className='row'>
-                        <div style={{ width: '100%' }}>
-                            <div style={{ color: 'var(--muted)', fontSize: 12, marginBottom: 8 }}>출력 포맷</div>
-                            <ToggleGroup value={c.format} items={formatItems} onChange={c.setFormat} disabled={c.busy} />
-                        </div>
+                        <div className="wfDivider" />
+
+                        <SettingSection busy={c.busy} formats={formats} format={c.format} onFormatChange={c.setFormat} 
+                            advancedOpen={c.advancedOpen} onToggleAdvanced={() => c.setAdvancedOpen(!c.advancedOpen)} 
+                            sampleRate={c.sampleRate} onSampleRateChange={c.setSampleRate} channels={c.channels} 
+                            onChannelsChange={c.setChannels} bitrate={c.bitrate} onBitrateChange={c.setBitrate} 
+                            bitrateDisabled={c.bitrateDisabled} />
+
+                        <div className="wfDivider" />
+                        <ResultSection busy={c.busy} success={success} failed={failed} resultPath={resultPath} log={c.log}
+                            showLog={showLog} onToggleLog={() => setShowLog(v => !v)} />
                     </div>
 
-                    <div className='box' style={{ marginTop: 12 }}>
-                        <div className='boxKey'>선택된 파일</div>
-                        <div>{c.selectedPath ?? '없음'}</div>
+                    <div className="wfCard">
+                        <h2 className="wfCardTitle">보조 영역</h2>
+                        <div className="wfResultLine"></div>
                     </div>
-
-                    {c.advancedOpen && (
-                        <div className='adv anumSlideDown'>
-                            <div className='kv'>
-                                <div style={{ width: '100%' }}>
-                                    <div style={{ color: 'var(--muted)', fontSize: 12, marginBottom: 8 }}>샘플레이트(Hz)</div>
-                                    <ToggleGroup value={c.sampleRate} items={rateItems} onChange={c.setSampleRate} disabled={c.busy} />
-                                </div>
-
-                                <div style={{ width: '100%' }}>
-                                    <div style={{ color: 'var(--muted)', fontSize: 12, marginBottom: 8 }}>채널</div>
-                                    <ToggleGroup value={c.channels} items={chItems} onChange={c.setChannels} disabled={c.busy} />
-                                </div>
-
-                                <div style={{ width: '100%' }}>
-                                    <div style={{ color: 'var(--muted)', fontSize: 12, marginBottom: 8 }}>비트레이트(kpbs) {c.bitrateDisabled ? '(WAV) 비활성' : ''}</div>
-                                    <ToggleGroup value={c.bitrateDisabled ? '' : c.bitrate} items={brItems} onChange={c.setBitrate} disabled={c.busy || c.bitrateDisabled} />
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    <div className='log'>{c.log}</div>
                 </div>
             </div>
         </div>
     );
 }
-
