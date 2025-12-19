@@ -35,13 +35,24 @@ export function SettingSection(props: Props) {
             <h2 className="wfCardTitle">설정</h2>
             <div className="wfField">
                 <div className="wfLabel">출력 포맷</div>
-                <div className="wfRow wfRadioRow">
-                    {formats.map(f => (
-                        <label key={f.value} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <input type="radio" name="format" checked={format === f.value} onChange={() => onFormatChange(f.value)} disabled={busy} />
-                            {f.label}
-                        </label>
-                    ))}
+                <div className="wfFormatGrid" role="radiogroup" aria-label="출력 포맷">
+                    {formats.map((f) => {
+                        const active = format === f.value;
+
+                        return (
+                            <button 
+                                key={f.value} 
+                                type="button" 
+                                className={['wfFormatCard', active ? 'isActive' : ''].join(' ')}
+                                onClick={() => onFormatChange(f.value)}
+                                disabled={busy}
+                                aria-pressed={active}
+                                data-active={active ? 'true' : 'false'}
+                            >
+                                <div className="wfFormatTitle">{f.value}</div>
+                            </button>
+                        );
+                    })}
                 </div>
             </div>
 

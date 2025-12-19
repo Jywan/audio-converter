@@ -30,7 +30,7 @@ export function Converter() {
     return (
         <div className="wfPage">
             <div className="wfShell">
-                <HeaderBar status={status} busy={c.busy} canConvert={canConvert} onPick={c.pick} onConvert={c.convert} />
+                <HeaderBar status={status} />
 
                 <div className="wfBody">
                     <div className="wfCard">
